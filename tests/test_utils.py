@@ -676,3 +676,17 @@ def test_make_default_short_help(unformatted_text, max_length, expect):
     assert len(expect) <= max_length
     out = click.utils.make_default_short_help(unformatted_text, max_length)
     assert out == expect
+
+
+@pytest.mark.parametrize(
+    ("words", "expect"),
+    [
+        pytest.param(
+            "CAPS SPACE",
+            "caps-space",
+            id="capitals and spaces go to lower case and dashes.",
+        ),
+    ],
+)
+def test_posixify(words, expect):
+    assert click.utils._posixify(words) == expect
