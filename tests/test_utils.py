@@ -618,36 +618,61 @@ def test_expand_args(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    ("value", "max_length", "expect"),
+    ("unformatted_text", "max_length", "expect"),
     [
-        pytest.param("", 10, "", id="empty"),
-        pytest.param("123 567 90", 10, "123 567 90", id="equal length, no dot"),
-        pytest.param("123 567 9. aaaa bbb", 10, "123 567 9.", id="sentence < max"),
-        pytest.param("123 567\n\n 9. aaaa bbb", 10, "123 567", id="paragraph < max"),
-        pytest.param("123 567 90123.", 10, "123 567...", id="truncate"),
-        pytest.param("123 5678 xxxxxx", 10, "123...", id="length includes suffix"),
+        pytest.param("This \n\n", 45, "This", id="keeps only first paragraph"),
+        pytest.param(
+            "This \n \t   this",
+            45,
+            "This this",
+            id="newlines tabs and spaces are collapsed to single spaces.",
+        ),
+        pytest.param("", 45, "", id="empty in yields empty out"),
+        pytest.param("\n\b\n this", 45, "this", id="No rewrap is ignored"),
+        pytest.param(
+            "123 567 9",
+            9,
+            "123 567 9",
+            id="input at or under max length is not chopped",
+        ),
+        pytest.param(
+            "123 567 9. aaaa bbb",
+            10,
+            "123 567 9.",
+            id="Get only first sentence as long as <= max",
+        ),
+        pytest.param(
+            "123 567 90123.",
+            10,
+            "123 567...",
+            id="Input over max is chopped and ellipses added.",
+        ),
+        # If ellipses were not accounted for output then would include 5678.
+        pytest.param(
+            "123 5678 xxxxxx", 10, "123...", id="max length accounts for ellipses"
+        ),
         pytest.param(
             "token in ~/.netrc ciao ciao",
             20,
             "token in ~/.netrc...",
             id="ignore dot in word",
         ),
-    ],
-)
-@pytest.mark.parametrize(
-    "alter",
-    [
-        pytest.param(None, id=""),
         pytest.param(
-            lambda text: "\n\b\n" + "  ".join(text.split(" ")) + "\n", id="no-wrap mark"
+            "Max limit breaks in this.",
+            22,
+            "Max limit breaks in...",
+            id="Max limit break in the middle of word this",
+        ),
+        pytest.param(
+            "Max limit breaks in this cleanly",
+            27,
+            "Max limit breaks in this...",
+            id="Max limit breaks cleanly on this so no removal is required",
         ),
     ],
 )
-def test_make_default_short_help(value, max_length, alter, expect):
+def test_make_default_short_help(unformatted_text, max_length, expect):
+    # Ensure did not make an error writing the test case.
     assert len(expect) <= max_length
-
-    if alter:
-        value = alter(value)
-
-    out = click.utils.make_default_short_help(value, max_length)
+    out = click.utils.make_default_short_help(unformatted_text, max_length)
     assert out == expect

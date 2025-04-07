@@ -57,10 +57,16 @@ def make_str(value: t.Any) -> str:
 
 
 def make_default_short_help(help: str, max_length: int = 45) -> str:
-    """Returns a condensed version of help string."""
-    # Consider only the first paragraph.
+    """
+    Makes condensed version of doc string.
+
+    Only considers the first sentence of first paragraph as long as the
+    sentence is less than max. Otherwise get as many words as possible and
+    finish with ellipsis (...).
+    """
     paragraph_end = help.find("\n\n")
 
+    # Consider only the first paragraph.
     if paragraph_end != -1:
         help = help[:paragraph_end]
 
@@ -70,31 +76,35 @@ def make_default_short_help(help: str, max_length: int = 45) -> str:
     if not words:
         return ""
 
-    # The first paragraph started with a "no rewrap" marker, ignore it.
+    # Ignore "no rewrap" marker.
     if words[0] == "\b":
         words = words[1:]
 
     total_length = 0
     last_index = len(words) - 1
-
     for i, word in enumerate(words):
         total_length += len(word) + (i > 0)
 
-        if total_length > max_length:  # too long, truncate
+        # If added enough words, then break.
+        if total_length > max_length:
             break
 
-        if word[-1] == ".":  # sentence end, truncate without "..."
+        # If short help is a complete sentence, truncate without "..."
+        if word[-1] == ".":
             return " ".join(words[: i + 1])
 
         if total_length == max_length and i != last_index:
-            break  # not at sentence end, truncate with "..."
+            # not at sentence end, truncate with "..."
+            break
+
     else:
-        return " ".join(words)  # no truncation needed
+        # no truncation needed
+        return " ".join(words)
 
     # Account for the length of the suffix.
     total_length += len("...")
 
-    # remove words until the length is short enough
+    # Remove words until the length is short enough
     while i > 0:
         total_length -= len(words[i]) + (i > 0)
 
