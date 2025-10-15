@@ -871,32 +871,31 @@ class Context:
 
 
 class Command:
-    """Commands are the basic building block of command line interfaces in
-    Click.  A basic command handles command line parsing and might dispatch
-    more parsing to commands nested below it.
+    """Commands are are a building block of command line interfaces in Click.
+
+    A command handles command line parsing.
 
     :param name: the name of the command to use unless a group overrides it.
     :param context_settings: an optional dictionary with defaults that are
-                             passed to the context object.
+        passed to the context object.
     :param callback: the callback to invoke.  This is optional.
     :param params: the parameters to register with this command.  This can
-                   be either :class:`Option` or :class:`Argument` objects.
+        be either :class:`Option` or :class:`Argument` objects.
     :param help: the help string to use for this command.
     :param epilog: like the help string but it's printed at the end of the
-                   help page after everything else.
+        help page after everything else.
     :param short_help: the short help to use for this command.  This is
-                       shown on the command listing of the parent command.
+        shown on the command listing of the parent command.
     :param add_help_option: by default each command registers a ``--help``
-                            option.  This can be disabled by this parameter.
-    :param no_args_is_help: this controls what happens if no arguments are
-                            provided.  This option is disabled by default.
-                            If enabled this will add ``--help`` as argument
-                            if no arguments are passed
+         option.  This can be disabled by this parameter.
+    :param no_args_is_help: Controls what happens if no arguments are
+        provided. If enabled this will add ``--help`` as argument
+        if no arguments are provided.
     :param hidden: hide this command from help outputs.
     :param deprecated: If ``True`` or non-empty string, issues a message
-                        indicating that the command is deprecated and highlights
-                        its deprecation in --help. The message can be customized
-                        by using a string as the value.
+        indicating that the command is deprecated and highlights
+        its deprecation in --help. The message can be customized
+        by using a string as the value.
 
     .. versionchanged:: 8.2
         This is the base class for all commands, not ``BaseCommand``.
